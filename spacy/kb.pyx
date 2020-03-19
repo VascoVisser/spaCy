@@ -12,6 +12,7 @@ from cpython.exc cimport PyErr_SetFromErrno
 from libc.stdio cimport fopen, fclose, fread, fwrite, feof, fseek
 from libc.stdint cimport int32_t, int64_t
 
+from .compat import copy_reg
 from .typedefs cimport hash_t
 
 from os import path
@@ -581,3 +582,15 @@ cdef class Reader:
         return status
 
 
+def pickle_kb(kb):
+    vocab = kb.vocab
+    entity_vector_length = kb.entity_vector_length
+    return (unpickle_kb, (vocab, entity_vector_length))
+
+
+def unpickle_kb(vocab, entity_vector_length):
+    cdef KnowledgeBase kb = KnowledgeBase(vocab, entity_vector_length)
+    return kb
+
+
+copy_reg.pickle(KnowledgeBase, pickle_kb, unpickle_kb)
